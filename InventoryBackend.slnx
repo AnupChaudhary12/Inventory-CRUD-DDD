@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="Inventory.API/Inventory.API.csproj" Id="fd103466-69b1-41a5-b637-32be126e8f3c" />
+    <Project Path="Inventory.Application/Inventory.Application.csproj" Id="273cfcac-f653-4e6e-be90-7f44370081b4" />
+    <Project Path="Inventory.Domain/Inventory.Domain.csproj" Id="530f27fb-bea3-4bfe-96e0-609ffdd725d8" />
+    <Project Path="Inventory.Persistence/Inventory.Persistence.csproj" Id="f42a32fd-0a10-40ac-a6bb-bf96ae99d28c" />
+    <Project Path="Inventory.Shared/Inventory.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
