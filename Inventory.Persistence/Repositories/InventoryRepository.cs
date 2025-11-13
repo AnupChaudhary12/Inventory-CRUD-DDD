@@ -45,16 +45,70 @@ public class InventoryRepository : IInventoryRepository
         );
     }
 
-    public async Task<GeneralResponseDto<List<GetProductDto>>> GetAllProducts(GetAllProductQuery request, CancellationToken cancellationToken)
+    public async Task<GeneralResponseDto<List<GetProductDto>>> GetAllProducts(GetAllProductQuery? request, CancellationToken cancellationToken)
     {
-        List<Product> products = await _inventoryDbContext.Products
-            .AsNoTracking()
+        int pageNo = 1;
+        int pageSize = 10;
+
+        IQueryable<Product> query = _inventoryDbContext.Products.AsNoTracking();
+
+        if (request is not null)
+        {
+            if (request.Id.HasValue)
+            {
+                query = query.Where(p => p.Id == request.Id.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.ProductName))
+            {
+                string productNameFilter = request.ProductName.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(productNameFilter));
+            }
+
+            if (request.AvailableStockCountFrom.HasValue)
+            {
+                query = query.Where(p => p.AvailableStock >= request.AvailableStockCountFrom.Value);
+            }
+
+            if (request.AvailableStockCountTo.HasValue)
+            {
+                query = query.Where(p => p.AvailableStock <= request.AvailableStockCountTo.Value);
+            }
+
+            if (request.ReorderStockCountFrom.HasValue)
+            {
+                query = query.Where(p => p.ReorderStock >= request.ReorderStockCountFrom.Value);
+            }
+
+            if (request.ReorderStockCountTo.HasValue)
+            {
+                query = query.Where(p => p.ReorderStock <= request.ReorderStockCountTo.Value);
+            }
+
+            pageNo = request.PageNo ?? pageNo;
+            pageSize = request.PageSize ?? pageSize;
+        }
+
+
+        int skip = (pageNo - 1) * pageSize;
+
+        int totalCount = await query.CountAsync(cancellationToken);
+
+        List<Product> products = await query
+            .OrderBy(p => p.Name)
+            .Skip(skip)
+            .Take(pageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
         if (products.Count == 0)
         {
             _logger.LogInformation(AppMessages.NullMessage("List of Products"));
+            return GeneralResponseDto<List<GetProductDto>>.FailureResponse(
+                message: AppMessages.NullMessage("List of Products"),
+                errorCode:"NOT_FOUND",
+                statusCode: (int)HttpStatusCode.NotFound
+            );
         }
 
         var getProducts = products
@@ -67,10 +121,14 @@ public class InventoryRepository : IInventoryRepository
             })
             .ToList();
 
-        _logger.LogInformation(AppMessages.RetrieveSuccessMessage("List of products"));
+        _logger.LogInformation(AppMessages.RetrieveSuccessMessage("List of Products"));
+
+        string message = $"{AppMessages.RetrieveSuccessMessage("List of Products")} " +
+                         $"Page {pageNo} of {Math.Ceiling((double)totalCount / pageSize)} (Total: {totalCount})";
+
         return GeneralResponseDto<List<GetProductDto>>.SuccessResponse(
             result: getProducts,
-            message: AppMessages.RetrieveSuccessMessage("List of Products"),
+            message: message,
             statusCode: (int)HttpStatusCode.OK
         );
     }
