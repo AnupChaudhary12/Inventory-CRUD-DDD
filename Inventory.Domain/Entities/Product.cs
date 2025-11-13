@@ -13,7 +13,6 @@ public class Product
 
     public Product() { }
 
-    [MapperConstructor]
     public Product( string name, int availableStock, int reorderStock)
     {
         Validate(name, availableStock, reorderStock);
