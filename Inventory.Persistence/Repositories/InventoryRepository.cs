@@ -2,6 +2,7 @@
 using Inventory.Application.Contracts.DTOs;
 using Inventory.Application.Contracts.PersistenceInterfaces;
 using Inventory.Application.Features.Inventory.Command.AddProduct;
+using Inventory.Application.Features.Inventory.Command.DeleteProduct;
 using Inventory.Application.Features.Inventory.Query.GetAllProduct;
 using Inventory.Domain.Entities;
 using Inventory.Shared;
@@ -44,6 +45,44 @@ public class InventoryRepository : IInventoryRepository
             (int)HttpStatusCode.OK
         );
     }
+
+    public async Task<GeneralResponseDto<string>> DeleteProductAsync(DeleteProductCommand command, CancellationToken cancellationToken)
+    {
+        if (command is null)
+        {
+            _logger.LogError("Command is null while deleting product");
+            return GeneralResponseDto<string>.FailureResponse(
+                AppMessages.NullMessage("DeleteProductCommand"),
+                "BAD_REQUEST",
+                (int)HttpStatusCode.BadRequest
+            );
+        }
+
+        Product? product = await _inventoryDbContext.Products
+            .FirstOrDefaultAsync(p => p.Id == command.Id, cancellationToken);
+
+        if (product is null)
+        {
+            _logger.LogWarning("Product with ID {ProductId} not found", command.Id);
+            return GeneralResponseDto<string>.FailureResponse(
+                $"Product with ID {command.Id} not found.",
+                "NOT_FOUND",
+                (int)HttpStatusCode.NotFound
+            );
+        }
+
+        _inventoryDbContext.Products.Remove(product);
+        await _inventoryDbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Product with ID {ProductId} deleted successfully", command.Id);
+
+        return GeneralResponseDto<string>.SuccessResponse(
+            $"Product with ID {command.Id} deleted successfully.",
+            "SUCCESS",
+            (int)HttpStatusCode.OK
+        );
+    }
+
 
     public async Task<GeneralResponseDto<List<GetProductDto>>> GetAllProducts(GetAllProductQuery? request, CancellationToken cancellationToken)
     {
