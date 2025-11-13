@@ -20,9 +20,9 @@ public class InventoryController : ControllerBase
     }
 
     [HttpGet("get-products")]
-    public async Task<IActionResult> GetProducts()
+    public async Task<IActionResult> GetProducts([FromQuery]GetAllProductQuery query)
     {
-        GeneralResponseDto<List<GetProductDto>> result = await _mediator.Send(new GetAllProductQuery());
+        GeneralResponseDto<List<GetProductDto>> result = await _mediator.Send(query);
 
        if (result.Success)
         {
