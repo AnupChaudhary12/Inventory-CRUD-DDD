@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using Inventory.Application.Contracts.DTOs;
 using Inventory.Application.Features.Inventory.Command.AddProduct;
+using Inventory.Application.Features.Inventory.Command.DeleteProduct;
 using Inventory.Application.Features.Inventory.Query.GetAllProduct;
 using MediatR;
 
@@ -10,4 +11,5 @@ public interface IInventoryRepository
 {
     Task<GeneralResponseDto<string>> AddProductToDbAsync(AddProductCommand command, CancellationToken cancellationToken);
     Task<GeneralResponseDto<List<GetProductDto>>> GetAllProducts(GetAllProductQuery? request, CancellationToken cancellationToken);
+    Task<GeneralResponseDto<string>> DeleteProductAsync(DeleteProductCommand command, CancellationToken cancellationToken);
 }

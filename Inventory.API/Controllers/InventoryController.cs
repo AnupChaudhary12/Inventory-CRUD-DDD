@@ -1,6 +1,7 @@
 ﻿using Inventory.Application.Contracts.DTOs;
 using Inventory.Application.Contracts.Services.Interface;
 using Inventory.Application.Features.Inventory.Command.AddProduct;
+using Inventory.Application.Features.Inventory.Command.DeleteProduct;
 using Inventory.Application.Features.Inventory.Query.GetAllProduct;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +51,22 @@ public class InventoryController : ControllerBase
         GeneralResponseDto<string> errorResult = _errorHandlingService.CreateFailureResponse<string>(
                 result.Message,
                 result.ErrorCode?? "INTERNAL_ERROR",
+                result.Result
+            );
+
+        return StatusCode(errorResult.StatusCode, errorResult);
+    }
+    [HttpDelete("delete-product")]
+    public async Task<IActionResult> DeleteProductAsync([FromQuery]DeleteProductCommand command)
+    {
+        GeneralResponseDto<string> result = await _mediator.Send(command);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        GeneralResponseDto<string> errorResult = _errorHandlingService.CreateFailureResponse<string>(
+                result.Message,
+                result.ErrorCode ?? "INTERNAL_ERROR",
                 result.Result
             );
 
