@@ -1,4 +1,6 @@
 
+using Delta;
+using Inventory.API.Middleware;
 using Inventory.Application;
 using Inventory.Persistence;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +35,7 @@ public static class StartupExtension
         }
 
         app.UseHttpsRedirection();
-
+        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
         app.UseAuthorization();
 
         app.MapControllers();

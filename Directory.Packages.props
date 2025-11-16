@@ -6,6 +6,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
+    <PackageVersion Include="Bogus" Version="35.6.5" />
+    <PackageVersion Include="Delta" Version="7.0.0" />
+    <PackageVersion Include="Delta.EF" Version="7.0.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageVersion Include="MediatR" Version="13.1.0" />
@@ -24,5 +27,6 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.6" />
+    <PackageVersion Include="Z.EntityFramework.Extensions.EFCore" Version="10.105.0" />
   </ItemGroup>
 </Project>

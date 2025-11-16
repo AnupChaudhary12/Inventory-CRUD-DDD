@@ -1,19 +1,18 @@
-
+using System.Data;
 using Ardalis.GuardClauses;
-using Riok.Mapperly.Abstractions;
 
 namespace Inventory.Domain.Entities;
 
 public class Product
 {
-    public Guid Id { get; private set; } 
+    public Guid Id { get; private set; }
     public string Name { get; private set; } = default!;
     public int AvailableStock { get; private set; }
     public int ReorderStock { get; private set; }
 
     public Product() { }
 
-    public Product( string name, int availableStock, int reorderStock)
+    private Product(string name, int availableStock, int reorderStock)
     {
         Validate(name, availableStock, reorderStock);
         Id = Guid.NewGuid();
@@ -21,14 +20,45 @@ public class Product
         AvailableStock = availableStock;
         ReorderStock = reorderStock;
     }
-    public static Product Create(string name, int availableStock, int reorderStock)
-            => new( name, availableStock, reorderStock);
 
-    public static void Validate(string name, int availableStock, int reorderStock)
+    public static Product Create(string name, int availableStock, int reorderStock)
+        => new(name, availableStock, reorderStock);
+
+    public void Update(string? name, int? availableStock, int? reorderStock)
     {
-        Guard.Against.NullOrWhiteSpace(name);
-        Guard.Against.Negative(availableStock);
-        Guard.Against.Negative(reorderStock);
+        Validate(name, availableStock, reorderStock);
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            Name= name;
+        }
+
+        if (availableStock.HasValue)
+        {
+            AvailableStock = availableStock.Value;
+        }
+
+        if (reorderStock.HasValue)
+        {
+            ReorderStock = reorderStock.Value;
+        }
     }
 
+    public static void Validate(string? name, int? availableStock, int? reorderStock)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            Guard.Against.NullOrWhiteSpace(name);
+        }
+
+        if (availableStock.HasValue)
+        {
+            Guard.Against.Negative(availableStock.Value);
+        }
+
+        if (reorderStock.HasValue)
+        {
+            Guard.Against.Negative(reorderStock.Value);
+        }
+    }
 }

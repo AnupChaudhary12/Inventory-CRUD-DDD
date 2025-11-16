@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="Delta" />
+    <PackageReference Include="Delta.EF" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="MediatR" />
@@ -15,6 +18,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Riok.Mapperly" />
+    <PackageReference Include="Z.EntityFramework.Extensions.EFCore" />
   </ItemGroup>
 
   <ItemGroup>
