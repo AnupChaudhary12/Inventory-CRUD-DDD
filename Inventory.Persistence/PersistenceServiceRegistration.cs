@@ -10,10 +10,11 @@ public static class PersistenceServiceRegistration
 {
     public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        //string? connectionString = configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<InventoryDbContext>(options =>
-            options.UseSqlite(connectionString ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")));
+        //services.AddDbContext<InventoryDbContext>(options =>
+        //    options.UseSqlite(connectionString ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")));
+        services.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("SqlServerConnection")));
 
         services.AddScoped<IInventoryRepository, InventoryRepository>();
 
