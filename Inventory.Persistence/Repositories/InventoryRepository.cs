@@ -1,8 +1,10 @@
 ﻿using System.Net;
+using Bogus;
 using Inventory.Application.Contracts.DTOs;
 using Inventory.Application.Contracts.PersistenceInterfaces;
 using Inventory.Application.Features.Inventory.Command.AddProduct;
 using Inventory.Application.Features.Inventory.Command.DeleteProduct;
+using Inventory.Application.Features.Inventory.Command.UpdateProduct;
 using Inventory.Application.Features.Inventory.Query.GetAllProduct;
 using Inventory.Domain.Entities;
 using Inventory.Shared;
@@ -100,8 +102,8 @@ public class InventoryRepository : IInventoryRepository
 
             if (!string.IsNullOrWhiteSpace(request.ProductName))
             {
-                string productNameFilter = request.ProductName.ToLower();
-                query = query.Where(p => p.Name.ToLower().Contains(productNameFilter));
+                string productNameFilter = request.ProductName!.ToLower();
+                query = query.Where(p => p.Name.Contains(productNameFilter, StringComparison.CurrentCultureIgnoreCase));
             }
 
             if (request.AvailableStockCountFrom.HasValue)
@@ -172,4 +174,67 @@ public class InventoryRepository : IInventoryRepository
         );
     }
 
+    public async Task<GeneralResponseDto<string>> UpdateProductAsync(UpdateProductCommand command, CancellationToken cancellationToken)
+    {
+        if (command is null)
+        {
+            _logger.LogError("Command is null while updating product");
+            return GeneralResponseDto<string>.FailureResponse(
+                AppMessages.NullMessage("UpdateProductCommand"),
+                "BAD_REQUEST",
+                (int)HttpStatusCode.BadRequest
+            );
+        }
+
+        Product? existingProduct = await _inventoryDbContext.Products
+            .FirstOrDefaultAsync(p => p.Id == command.Id, cancellationToken);
+
+        if (existingProduct is null)
+        {
+            _logger.LogWarning("Product with ID {ProductId} not found", command.Id);
+            return GeneralResponseDto<string>.FailureResponse(
+                $"Product with ID {command.Id} not found.",
+                "NOT_FOUND",
+                (int)HttpStatusCode.NotFound
+            );
+        }
+
+        existingProduct.Update(
+            command.Name,
+            command.AvailabaleStock,
+            command.ReorderStock
+        );
+
+        await _inventoryDbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Product with ID {ProductId} updated successfully", command.Id);
+
+        return GeneralResponseDto<string>.SuccessResponse(
+            $"Product with ID {command.Id} updated successfully.",
+            "SUCCESS",
+            (int)HttpStatusCode.OK
+        );
+    }
+
+    // Bogus and EfCore extension example to update in bulk 1 million products. Efcore Extensions is dual license and paid for commercial use when revenue is over 1 million uSd per annum. Free for test and individual.
+    public async Task<GeneralResponseDto<string>> InsertBulkProductsUsingEfCoreExtensions(CancellationToken cancellationToken)
+    {
+        Faker<Product> faker = new Faker<Product>()
+        .CustomInstantiator(f => Product.Create(
+            f.Commerce.ProductName(),
+            f.Random.Int(0, 1000),
+            f.Random.Int(10, 100)
+        ));
+        List<Product> products = faker.Generate(1_000_000);
+
+        await _inventoryDbContext.BulkInsertAsync(products,cancellationToken);
+
+        _logger.LogInformation("1 million products added successfully");
+
+        return GeneralResponseDto<string>.SuccessResponse(
+            "1 million products added successfully.",
+            "SUCCESS",
+            (int)HttpStatusCode.OK
+        );
+    }
 }

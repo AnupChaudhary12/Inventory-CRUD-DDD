@@ -1,10 +1,13 @@
 ﻿using Inventory.Application.Contracts.DTOs;
 using Inventory.Application.Contracts.Services.Interface;
+using Inventory.Application.Features.Inventory.Command.AddMillionProductTest;
 using Inventory.Application.Features.Inventory.Command.AddProduct;
 using Inventory.Application.Features.Inventory.Command.DeleteProduct;
+using Inventory.Application.Features.Inventory.Command.UpdateProduct;
 using Inventory.Application.Features.Inventory.Query.GetAllProduct;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Inventory.API.Controllers;
 
@@ -72,5 +75,40 @@ public class InventoryController : ControllerBase
 
         return StatusCode(errorResult.StatusCode, errorResult);
     }
+    [HttpPut("update-product")]
+    public async Task<IActionResult> UpdateProductAsync([FromBody]UpdateProductCommand command)
+    {
+        GeneralResponseDto<string> result = await _mediator.Send(command);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        GeneralResponseDto<string> errorResult = _errorHandlingService.CreateFailureResponse<string>(
+                result.Message,
+                result.ErrorCode ?? "INTERNAL_ERROR",
+                result.Result
+            );
+
+        return StatusCode(errorResult.StatusCode, errorResult);
+    }
+    [HttpPost("add-million-product-test")]
+    public async Task<IActionResult> AddMillionProductEfCoreExtensionTest()
+    {
+        GeneralResponseDto<string> result = await _mediator.Send(new AddMillionProductTestCommand());
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        GeneralResponseDto<string> errorResult = _errorHandlingService.CreateFailureResponse<string>(
+            result.Message,
+            result.ErrorCode ?? "INTERNAL_ERROR",
+            result.Result
+        );
+
+        return StatusCode(errorResult.StatusCode, errorResult);
+    }
+
 }
 
